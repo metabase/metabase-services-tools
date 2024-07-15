@@ -26,7 +26,9 @@ This is simply a baseline environment and no reason other reverse proxies and SQ
 
 ## Configuration
 Once you've copied the entire folder structure locally, you may have or want to make some adjustments.
+<br>
 Loki folder:
+<br>
 You may have to make permissions adjustments similar to the following depending on existing permissions
   - mkdir -p ./loki/data/index
   - mkdir -p ./loki/data/cache
