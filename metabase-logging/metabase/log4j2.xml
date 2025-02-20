@@ -7,7 +7,8 @@
       </PatternLayout>
     </Console>
     
-    <RollingFile name="FILE" fileName="/path/to/metabase/logs/metabase.log" filePattern="/path/to/metabase/logs/metabase.log/metabase.log.%i">
+    <RollingFile name="FILE" fileName="/var/log/metabase/metabase.log"
+      filePattern="/var/log/metabase/metabase-%i.log">
       <Policies>
         <SizeBasedTriggeringPolicy size="500 MB"/>
       </Policies>
@@ -30,6 +31,7 @@
     <Logger name="org.quartz" level="INFO"/>
     <Logger name="liquibase" level="ERROR"/>
     <Logger name="net.snowflake.client.jdbc.SnowflakeConnectString" level="ERROR"/>
+    <Logger name="metabase.models.params.chain-filter" level="INFO"/>
 
     <Root level="WARN">
       <!-- <AppenderRef ref="STDOUT"/> -->
