@@ -4,12 +4,14 @@ networks:
   app-network:
 
 services:
-  postgres:
+  postgres15:
     image: postgres:15.4
     ports:
       - "5452:5432"
-    env_file:
-      - ./postgres/.env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Panthro1*
+      - POSTGRES_DB=fifty_db
     command:
       - postgres
       - -c
@@ -24,11 +26,6 @@ services:
       - ./postgres/logs:/var/log/postgresql
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
 
   metabase:
     build:
@@ -40,51 +37,44 @@ services:
       - postgres15
     env_file:
       - ./metabase/.env
+    environment:
+      - JAVA_OPTS=-Dlog4j.configurationFile=/app/log4j2.xml
     volumes:
-      - ./metabase/logs:/path/to/metabase/logs
+      - ./metabase/log4j2.xml:/app/log4j2.xml
+      - ./metabase/logs:/var/log/metabase
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
+
+
+
 
   loki:
-    build:
-      context: ./loki
+    image: grafana/loki:2.9.4  # Upgraded Loki
+    restart: unless-stopped
     ports:
       - "3100:3100"
     volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml
       - ./loki/data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
 
   promtail:
-    image: grafana/promtail:2.7.1
+    image: grafana/promtail:2.9.4  # Upgraded Promtail
     ports:
       - "9080:9080"
     volumes:
       - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
       - ./postgres/logs:/var/log/postgresql
-      - ./metabase/logs:/path/to/metabase/logs
+      - ./metabase/logs:/var/log/metabase
       - /var/tmp/nginx:/var/tmp/nginx
     command: -config.file=/etc/promtail/promtail-config.yaml
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
 
   grafana:
-    image: grafana/grafana:9.1.6
+    image: grafana/grafana:11.2.0  # Confirmed version
     ports:
       - "3000:3000"
     environment:
@@ -93,11 +83,6 @@ services:
       - grafana-storage:/var/lib/grafana
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
 
   nginx:
     build:
@@ -109,11 +94,6 @@ services:
       - /var/tmp/nginx:/var/tmp/nginx
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 1024M
-    #       cpus: "1.0"
 
 volumes:
   grafana-storage:
